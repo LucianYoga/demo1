@@ -5,9 +5,9 @@ machine:
       - docker
     environment:
       SHORT_SHA: $(echo $CIRCLE_SHA1 | cut -b1-7)
-      TAG_NAME: “br-$CIRCLE_BRANCH-$SHORT_SHA”
-      IMAGE_PATH: “lucianyoga01/demo1”
-      DOCKER_RUN_CMD: “elixir -pa _build/prod/consilidated -S mix test”
+      TAG_NAME: "br-$CIRCLE_BRANCH-$SHORT_SHA"
+      IMAGE_PATH: "lucianyoga01/demo1"
+      DOCKER_RUN_CMD: "elixir -pa _build/prod/consilidated -S mix test"
       PROD: carburetor-prod-s1
       STAG: carburetor-stag-s1
 
