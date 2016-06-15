@@ -1,33 +1,20 @@
 machine:
-    node:
-        version:
-            0.10.33
-    services:
-        - docker
-
-checkout:
-    post:
-        - chmod +x ./fix_dockerfile.sh && ./fix_dockerfile.sh
-        - chmod +x ./deploy.prod.sh
-        - chmod +x ./deploy.test.1.sh
+  services:
+    - docker
 
 dependencies:
-    post:
-        - sudo pip install --upgrade awscli
-        - sudo apt-get update && sudo apt-get install jq
-        - curl -L -o ~/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5rc1/jq-linux-x86_64-static && chmod +x ~/bin/jq
-        - curl -L https://github.com/docker/compose/releases/download/1.5.0/docker-compose-`uname -s`-`uname -m` > ../bin/docker-compose && chmod +x ../bin/docker-compose
-        - docker build --rm=false -t acmeinc/sample-api:$CIRCLE_SHA1 . | cat
+  override:
+    - docker info
+    - docker build -t circleci/elasticsearch .
+
 test:
-    override:
-        - npm test
+  override:
+    - docker run -d -p 9200:9200 circleci/elasticsearch; sleep 10
+    - curl --retry 10 --retry-delay 5 -v http://localhost:9200
 
 deployment:
-    prod:
-        branch: release
-        commands:
-            - ./deploy.prod.sh
-    test:
-        branch: test.1
-        commands:
-            - ./deploy.test.1.sh
+  hub:
+    branch: master
+    commands:
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push circleci/elasticsearch
